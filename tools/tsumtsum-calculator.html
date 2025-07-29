@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ツムツム セレクトボックス期待値計算ツール</title>
+
+    <!-- Tailwind CSSの読み込み -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fontsの読み込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .tsum-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+        .tsum-button {
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .tsum-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(253, 224, 71, 0.5);
+        }
+        .tsum-button:active {
+            transform: translateY(1px) scale(0.98);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        input[type=number] {
+          -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-300 via-purple-300 to-indigo-400 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md mx-auto">
+
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                セレボ期待値計算ツール
+            </h1>
+            <p class="text-white/90 mt-2" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">欲しいツムを引ける確率を計算しよう！</p>
+        </header>
+
+        <main id="calculator" class="tsum-card rounded-3xl shadow-2xl p-6 md:p-8 space-y-6">
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="totalTsums" class="block text-sm font-bold text-gray-700 mb-1">① セレボ総数</label>
+                    <input type="number" id="totalTsums" min="1" value="12" class="w-full p-3 text-lg text-center font-bold text-gray-800 bg-white/70 border-2 border-pink-300 rounded-xl focus:ring-4 focus:ring-pink-400 focus:border-pink-400 transition">
+                </div>
+                <div>
+                    <label for="desiredTsums" class="block text-sm font-bold text-gray-700 mb-1">② 欲しいツムの種類</label>
+                    <input type="number" id="desiredTsums" min="1" value="3" class="w-full p-3 text-lg text-center font-bold text-gray-800 bg-white/70 border-2 border-purple-300 rounded-xl focus:ring-4 focus:ring-purple-400 focus:border-purple-400 transition">
+                </div>
+            </div>
+
+            <div>
+                <label for="targetHits" class="block text-lg font-bold text-gray-700 mb-2">
+                    <span class="text-xl">③</span> 欲しいツムを合計で何<strong class="text-red-500">回</strong>引くのが目標？
+                </label>
+                <input type="number" id="targetHits" min="1" value="10" class="w-full p-3 text-xl text-center font-bold text-gray-800 bg-white/70 border-2 border-green-300 rounded-xl focus:ring-4 focus:ring-green-400 focus:border-green-400 transition">
+                <p class="text-sm text-gray-500 mt-1 text-center">スキルマまでに必要な回数などを入力</p>
+            </div>
+
+            <hr>
+
+            <div>
+                <label for="currentCoins" class="block text-lg font-bold text-gray-700 mb-2">
+                    <span class="text-xl">④</span> 手持ちコインでシミュレーション
+                </label>
+                <input type="text" id="currentCoins" placeholder="例: 1,000,000 (任意)" class="w-full p-3 text-xl text-center font-bold text-gray-800 bg-white/70 border-2 border-yellow-400 rounded-xl focus:ring-4 focus:ring-yellow-500 focus:border-yellow-500 transition">
+                 <p class="text-sm text-gray-500 mt-1 text-center">現在のコイン枚数を入力 (任意)</p>
+            </div>
+
+
+            <button id="calculateBtn" class="w-full tsum-button bg-yellow-400 text-gray-900 font-extrabold text-xl py-4 px-6 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out">
+                ✨ 計算する ✨
+            </button>
+        </main>
+
+        <div id="result" class="mt-6"></div>
+
+    </div>
+
+    <script>
+        const totalTsumsInput = document.getElementById('totalTsums');
+        const desiredTsumsInput = document.getElementById('desiredTsums');
+        const targetHitsInput = document.getElementById('targetHits');
+        const currentCoinsInput = document.getElementById('currentCoins');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultDiv = document.getElementById('result');
+
+        const coinIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-1 text-yellow-600" viewBox="0 0 20 20" fill="currentColor"><path d="M8.433 7.418c.158-.103.346-.195.574-.277a6.213 6.213 0 014.22.254 1 1 0 01.625.928v1.455a1 1 0 01-.471.854 6.21 6.21 0 01-4.22-.254 1 1 0 01-.625-.928V8.272a1 1 0 01.47-.854zM4 10a6 6 0 1112 0 6 6 0 01-12 0z" /></svg>`;
+        const costPerPull = 30000;
+
+        // コイン入力のフォーマット
+        currentCoinsInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/,/g, '');
+            if(isNaN(value) || value === '') {
+                e.target.value = '';
+                return;
+            }
+            e.target.value = parseInt(value, 10).toLocaleString();
+        });
+
+
+        calculateBtn.addEventListener('click', () => {
+            // 入力値の取得
+            const totalTsums = parseInt(totalTsumsInput.value, 10);
+            const desiredTsums = parseInt(desiredTsumsInput.value, 10);
+            const targetHits = parseInt(targetHitsInput.value, 10);
+            const currentCoins = parseInt(currentCoinsInput.value.replace(/,/g, ''), 10) || 0;
+
+            // バリデーション
+            if (isNaN(totalTsums) || isNaN(desiredTsums) || isNaN(targetHits) || totalTsums <= 0 || desiredTsums <= 0 || targetHits <= 0) {
+                showError("①〜③には有効な数値を入力してください。");
+                return;
+            }
+            if (desiredTsums > totalTsums) {
+                showError("欲しいツムの種類(②)は、セレボ総数(①)より多く設定できません。");
+                return;
+            }
+
+            let resultHTML = '';
+
+            // --- 期待値計算 ---
+            // 負の二項分布の期待値 E[X] = r/p を利用
+            // r = 目標回数 (targetHits)
+            // p = 成功確率 (desiredTsums / totalTsums)
+            // 期待される試行回数 = targetHits / (desiredTsums / totalTsums)
+            const expectedPulls = targetHits * (totalTsums / desiredTsums);
+            const expectedCost = Math.round(expectedPulls * costPerPull);
+            resultHTML += generateTargetResultHTML(targetHits, expectedPulls, expectedCost);
+
+
+            // --- 手持ちコインでのシミュレーション ---
+            if (currentCoins > 0) {
+                const availablePulls = Math.floor(currentCoins / costPerPull);
+                if(availablePulls > 0) {
+                    // n回試行したときの成功回数の期待値 E[X] = n*p
+                    // n = 引ける回数 (availablePulls)
+                    // p = 成功確率 (desiredTsums / totalTsums)
+                    const expectedHits = availablePulls * (desiredTsums / totalTsums);
+                    resultHTML += generateSimulationResultHTML(currentCoins, availablePulls, expectedHits);
+                }
+            }
+
+            displayResult(resultHTML);
+        });
+
+        // --- HTML生成関数 ---
+        const formatNumber = (num) => num.toLocaleString();
+
+        function generateTargetResultHTML(target, pulls, cost) {
+            return `
+                <div class="bg-white/50 p-4 rounded-xl mb-4">
+                    <h3 class="font-bold text-gray-700 text-lg text-center pb-2 border-b border-pink-200">
+                        🎯 目標達成の期待値
+                    </h3>
+                    <p class="text-center text-gray-600 mt-2">欲しいツムを合計で <strong class="text-pink-600 text-xl">${target}回</strong> 引くまで...</p>
+                    <div class="text-center mt-2">
+                        <p class="text-3xl font-extrabold text-pink-600">${formatNumber(Math.round(pulls * 10) / 10)} 回</p>
+                        <p class="text-lg font-bold text-gray-600 mt-1 flex items-center justify-center">
+                           ${coinIcon} 約 ${formatNumber(cost)}
+                        </p>
+                        <p class="text-xs text-gray-500 mt-2">（ガチャを引く回数の期待値）</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateSimulationResultHTML(coins, pulls, expectedHits) {
+             return `
+                <div class="bg-white/50 p-4 rounded-xl">
+                    <h3 class="font-bold text-gray-700 text-lg text-center pb-2 border-b border-purple-200">
+                        💰 手持ちコインでの見込み
+                    </h3>
+                    <p class="text-center text-gray-600 mt-2"><strong class="text-purple-600 text-xl">${formatNumber(coins)}</strong> コインだと <strong class="text-purple-600 text-xl">${pulls}回</strong> 引けます。</p>
+                    <div class="text-center mt-2">
+                        <p class="text-gray-600">その場合、欲しいツムは平均で...</p>
+                        <p class="text-3xl font-extrabold text-purple-600">${formatNumber(Math.round(expectedHits * 100) / 100)} 回</p>
+                        <p class="text-gray-600">引ける見込みです。</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayResult(html) {
+             resultDiv.innerHTML = `
+                <div class="tsum-card rounded-3xl shadow-xl p-6 fade-in">
+                    <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">📊 計算結果 📊</h2>
+                    ${html}
+                </div>
+            `;
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function showError(message) {
+             resultDiv.innerHTML = `
+                <div class="tsum-card rounded-2xl p-4 bg-red-100 border-2 border-red-400 fade-in">
+                    <p class="text-center font-bold text-red-600">${message}</p>
+                </div>
+            `;
+             resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+    </script>
+</body>
+</html>
