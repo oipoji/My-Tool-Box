@@ -114,7 +114,7 @@
             <h1 class="text-3xl md:text-4xl font-bold text-gray-800">相続税計算シミュレーター</h1>
             <p class="mt-2 text-lg text-gray-600">詳しい解説付きで初心者でも安心</p>
         </header>
-        
+
         <div class="p-4 mb-8 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
           <span class="font-bold">【免責事項】</span>このシミュレーターは一般的なケースを想定した概算です。実際の税額とは異なる場合があり、税法改正等により内容が変わる可能性があります。正確な申告・納税には、必ず税理士にご相談ください。
         </div>
@@ -126,7 +126,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     1. 相続人と財産について入力
                 </h2>
-                
+
                 <h3 class="mb-4 text-lg">A. 法定相続人</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 p-4 bg-gray-50 rounded-lg mb-6">
                     <div>
@@ -226,7 +226,7 @@
                         <p class="text-sm text-gray-500">（財産合計から基礎控除などを引いた額）</p>
                     </div>
                 </div>
-                
+
                 <h3 class="mt-8 mb-4">各相続人の納税額の目安</h3>
                 <div id="heirResults" class="space-y-3"></div>
                 <p class="mt-4 text-xs text-gray-500">※上記は、法律で定められた割合（法定相続分）で財産を取得した場合の目安です。実際の分け方によって各人の税額は変わります（相続税の総額は変わりません）。</p>
@@ -308,15 +308,15 @@
                         <p class="text-gray-700 mt-1">死亡保険金には「500万円 × 法定相続人の数」の非課税枠があります。預金を保険に変えるだけで財産を圧縮でき、納税資金の準備にも役立ちます。</p>
                         <div class="mt-3 p-3 bg-white border-l-4 border-yellow-400">
                            <p class="font-bold">🤔「相続額が大きいと、少しの控除は意味がない」は本当？</p>
-                           <p class="text-sm mt-1">いいえ、**大きな間違い**です。相続税は、財産の最も高い価格帯の部分に、最も高い税率がかかります。例えば、税率40%の対象となる財産がある場合、1,000万円の生命保険金控除を使うと、納税額が **1,000万円 × 40% = 400万円** も少なくなります。控除は、**納税額そのものを直接減らす**非常に強力な効果があります。</p>
+                           <p class="text-sm mt-1">いいえ、<b>大きな間違い</b>です。相続税は、財産の最も高い価格帯の部分に、最も高い税率がかかります。例えば、税率40%の対象となる財産がある場合、1,000万円の生命保険金控除を使うと、納税額が <b>1,000万円 × 40% = 400万円</b> も少なくなります。控除は、<b>納税額そのものを直接減らす</b>非常に強力な効果があります。</p>
                         </div>
                     </div>
                     <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
                         <h3 class="font-bold text-lg text-indigo-700">②「小規模宅地等の特例」で不動産評価額を大幅に下げる</h3>
-                        <p class="text-gray-700 mt-1">亡くなった方の自宅や事業用の土地を、配偶者や同居の親族などが相続する場合、土地の評価額を**最大80%**も減額できる、非常に強力な制度です。</p>
+                        <p class="text-gray-700 mt-1">亡くなった方の自宅や事業用の土地を、配偶者や同居の親族などが相続する場合、土地の評価額を<b>最大80%</b>も減額できる、非常に強力な制度です。</p>
                         <div class="mt-3 p-3 bg-white border-l-4 border-green-400">
                            <p class="font-bold">💡 具体的な効果は？</p>
-                           <p class="text-sm mt-1">例えば、評価額が5,000万円の自宅の土地にこの特例が使えると、税金計算上の評価額は **5,000万円 × 20% = 1,000万円** にまで下がります。この差額4,000万円分がまるごと課税対象から外れるため、節税効果は絶大です。<br>ただし、誰が相続するか、相続後も住み続けるかなど、適用要件が非常に複雑なため、**必ず専門家への相談が必要**です。</p>
+                           <p class="text-sm mt-1">例えば、評価額が5,000万円の自宅の土地にこの特例が使えると、税金計算上の評価額は <b>5,000万円 × 20% = 1,000万円</b> にまで下がります。この差額4,000万円分がまるごと課税対象から外れるため、節税効果は絶大です。<br>ただし、誰が相続するか、相続後も住み続けるかなど、適用要件が非常に複雑なため、<b>必ず専門家への相談が必要</b>です。</p>
                         </div>
                     </div>
                     <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
@@ -372,7 +372,7 @@
             // --- イベントリスナー ---
             heirPatternSelect.addEventListener('change', updateHeirCountUI);
             calculateBtn.addEventListener('click', executeCalculation);
-            
+
             // --- 初期化 ---
             updateHeirCountUI();
 
@@ -397,7 +397,7 @@
                     heirCountContainer.style.display = 'none';
                 }
             }
-            
+
             function formatCurrency(amount) {
                 if (typeof amount !== 'number' || isNaN(amount)) return '0 円';
                 return Math.round(amount).toLocaleString('ja-JP') + ' 円';
@@ -439,37 +439,37 @@
                 let shareTexts = {};
 
                 switch (inputs.pattern) {
-                    case 'spouseAndChildren': 
-                        hasSpouse = true; numChildren = inputs.heirs_count; 
+                    case 'spouseAndChildren':
+                        hasSpouse = true; numChildren = inputs.heirs_count;
                         statutoryShares = { spouse: 0.5, children: 0.5 };
                         shareTexts = { spouse: '1/2', children: `1/2を${numChildren}人で分割` };
                         break;
-                    case 'spouseAndParents': 
+                    case 'spouseAndParents':
                         hasSpouse = true; numParents = inputs.heirs_count;
                         statutoryShares = { spouse: 2/3, parents: 1/3 };
                         shareTexts = { spouse: '2/3', parents: `1/3を${numParents}人で分割` };
                         break;
-                    case 'spouseAndSiblings': 
+                    case 'spouseAndSiblings':
                         hasSpouse = true; numSiblings = inputs.heirs_count;
                         statutoryShares = { spouse: 3/4, siblings: 1/4 };
                         shareTexts = { spouse: '3/4', siblings: `1/4を${numSiblings}人で分割` };
                         break;
-                    case 'childrenOnly': 
+                    case 'childrenOnly':
                         numChildren = inputs.heirs_count;
                         statutoryShares = { children: 1 };
                         shareTexts = { children: `全体を${numChildren}人で分割` };
                         break;
-                    case 'parentsOnly': 
+                    case 'parentsOnly':
                         numParents = inputs.heirs_count;
                         statutoryShares = { parents: 1 };
                         shareTexts = { parents: `全体を${numParents}人で分割` };
                         break;
-                    case 'siblingsOnly': 
+                    case 'siblingsOnly':
                         numSiblings = inputs.heirs_count;
                         statutoryShares = { siblings: 1 };
                         shareTexts = { siblings: `全体を${numSiblings}人で分割` };
                         break;
-                    case 'spouseOnly': 
+                    case 'spouseOnly':
                         hasSpouse = true;
                         statutoryShares = { spouse: 1 };
                         shareTexts = { spouse: 'すべて' };
@@ -478,8 +478,8 @@
 
                 const numLegalHeirs = (hasSpouse ? 1 : 0) + numChildren + numParents + numSiblings;
                 if (numLegalHeirs === 0) { alert("相続人がいません。計算できません。"); return; }
-                
-                const process = {}; 
+
+                const process = {};
 
                 process.originalRealEstate = inputs.assetRealEstate;
                 process.realEstateValue = inputs.smallScaleLand ? inputs.assetRealEstate * 0.2 : inputs.assetRealEstate;
@@ -491,7 +491,7 @@
 
                 process.totalPositiveAssets = inputs.assetCash + inputs.assetSecurities + inputs.assetRealEstate + inputs.assetLifeInsurance + inputs.assetOther;
                 process.totalLiabilities = inputs.liabilityDebt + inputs.liabilityFuneral;
-                
+
                 const netAssetsForTax = inputs.assetCash + inputs.assetSecurities + process.realEstateValue + process.taxableLifeInsurance + inputs.assetOther;
                 process.netAssets = netAssetsForTax - process.totalLiabilities;
 
@@ -501,7 +501,7 @@
 
                 let totalTax = 0;
                 let heirStatutoryTaxes = [];
-                
+
                 if (process.taxableEstate > 0) {
                     const addStatutoryTax = (isHeir, num, type, totalShare, shareText) => {
                         if (!isHeir) return;
@@ -564,7 +564,7 @@
             function displayResults(process, finalHeirTaxes) {
                 document.getElementById('resultTotalTax').textContent = formatCurrency(process.totalTax);
                 document.getElementById('resultTaxableEstate').textContent = formatCurrency(process.taxableEstate);
-                
+
                 const taxMessage = document.getElementById('taxMessage');
                 if (process.totalTax > 0) {
                     taxMessage.textContent = '相続税の総額です。';
@@ -600,7 +600,7 @@
 
             function displayCalculationProcess(process, inputs) {
                 const container = document.getElementById('calculationProcess');
-                
+
                 let step3Html = '';
                 if (process.heirStatutoryTaxes.length > 0) {
                     process.heirStatutoryTaxes.forEach(heir => {
