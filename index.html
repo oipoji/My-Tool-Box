@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <!-- 文字化けを解決するためのMETAタグ -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tool Box - 作成したツール一覧</title>
+
+    <!-- Tailwind CSS を読み込み -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts と Lucide Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Noto+Sans+JP:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* フォント設定 */
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+        }
+
+        /* アニメーション用のカスタムCSS */
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.05);
+            }
+        }
+
+        .animate-pulse-glow {
+            animation: pulse-glow 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white">
+
+    <div class="relative min-h-screen overflow-hidden">
+        <!-- 背景のグラデーションと装飾 -->
+        <div
+            class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gray-900 via-gray-900 to-cyan-900/40 z-0">
+        </div>
+        <div
+            class="absolute top-[-20%] left-[-10%] w-96 h-96 bg-cyan-500/20 rounded-full filter blur-3xl opacity-30 animate-pulse-glow">
+        </div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-indigo-500/20 rounded-full filter blur-3xl opacity-30 animate-pulse-glow"
+            style="animation-delay: 3s;"></div>
+
+        <div class="relative z-10">
+            <!-- ヘッダー -->
+            <header class="py-12 px-4 text-center">
+                <div
+                    class="inline-block bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl border border-gray-700/50 shadow-2xl">
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">
+                        <span class="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500">
+                            My Tool Box
+                        </span>
+                    </h1>
+                    <p class="mt-3 text-gray-400">作成した便利なWebツールを公開しています。</p>
+                </div>
+            </header>
+
+            <!-- ツール一覧をここに挿入 -->
+            <main class="container mx-auto px-4 py-8">
+                <div id="tool-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- JavaScriptによってカードがここに追加されます -->
+                </div>
+            </main>
+
+            <!-- フッター -->
+            <footer class="text-center py-8 text-gray-500">
+                <p>&copy; <span id="year"></span> oipoji. All Rights Reserved.</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // =================================================================================
+        // ツールデータ
+        // =================================================================================
+        const toolsData = [
+            {
+                title: '相続税計算シミュレーター',
+                description: '相続税計算シミュレーター',
+                imageUrl: 'https://placehold.co/600x400/1a1a1a/ffffff?text=Inheritance+Tax+Calculator',
+                toolUrl: './tools/inheritance-tax-calculator.html',
+                githubUrl: null, // GitHubがない場合は null のまま
+                tags: ['計算ツール'],
+            },
+            /*
+            {
+                title: 'Markdown エディタ',
+                description: 'リアルタイムでプレビューが可能な高機能Markdownエディタ。',
+                imageUrl: 'https://placehold.co/600x400/1a1a1a/ffffff?text=Markdown+Editor',
+                toolUrl: '#',
+                githubUrl: '#', // GitHubがある場合の例
+                tags: ['開発ツール', 'テキスト'],
+            },
+            */
+        ];
+
+        // ツールカードを生成して表示する関数
+        function renderToolCards() {
+            const toolGrid = document.getElementById('tool-grid');
+            if (!toolGrid) return; // tool-grid がなければ何もしない
+
+            let content = '';
+
+            toolsData.forEach(tool => {
+                // タグのHTMLを生成
+                const tagsHtml = tool.tags.map(tag => `
+                    <span class="inline-block bg-gray-700 rounded-full px-3 py-1 text-xs font-semibold text-cyan-300 mr-2 mb-2">
+                        #${tag}
+                    </span>
+                `).join('');
+
+                // =======================================================================
+                //【修正点】GitHubリンクの生成ロジックをより確実なif文に変更しました
+                // =======================================================================
+                let githubLinkHtml = ''; // まずは空文字で初期化
+                // tool.githubUrlに有効な値（nullや空文字でない）がある場合のみ、リンクのHTMLを生成
+                if (tool.githubUrl) {
+                    githubLinkHtml = `
+                        <a href="${tool.githubUrl}" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors duration-300">
+                            <i data-lucide="github" class="h-6 w-6"></i>
+                        </a>
+                    `;
+                }
+
+                // カード全体のHTML
+                content += `
+                    <div class="group bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden shadow-lg transform hover:-translate-y-2 transition-all duration-300 ease-in-out hover:shadow-cyan-500/20">
+                        <div class="overflow-hidden"><img class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="${tool.imageUrl}" alt="${tool.title}" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1a1a1a/ffffff?text=Image+Not+Found';"></div>
+                        <div class="p-6 flex flex-col h-[250px]">
+                            <h3 class="text-xl font-bold text-white mb-2">${tool.title}</h3>
+                            <p class="text-gray-400 text-sm mb-4 flex-grow">${tool.description}</p>
+                            <div class="mb-4">
+                                ${tagsHtml}
+                            </div>
+                            <div class="flex justify-between items-center mt-auto">
+                                <a href="${tool.toolUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center text-sm font-semibold text-white bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded-lg transition-colors duration-300">
+                                    ツールを使う
+                                    <i data-lucide="external-link" class="ml-2 h-4 w-4"></i>
+                                </a>
+                                <div class="flex space-x-3">
+                                    ${githubLinkHtml}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            toolGrid.innerHTML = content;
+        }
+
+        // 年を自動更新
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // ページ読み込み完了時に実行
+        document.addEventListener('DOMContentLoaded', () => {
+            renderToolCards();
+            // Lucideアイコンを初期化
+            lucide.createIcons();
+        });
+    </script>
+</body>
+
+</html>
