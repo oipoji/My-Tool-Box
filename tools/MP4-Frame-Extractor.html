@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MP4フレーム抽出ツール</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- JSZip CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        /* Interフォントの読み込み */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Tailwind bg-gray-900 */
+        }
+        /* カスタムスタイル */
+        .card {
+            background-color: #1f2937; /* Tailwind bg-gray-800 */
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 1.5rem; /* p-6 */
+            margin-bottom: 1.5rem; /* mb-6 */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        /* ファイル入力のスタイル */
+        input[type="file"]::file-selector-button {
+            background-color: #3b82f6; /* bg-blue-600 */
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem; /* rounded-md */
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background-color: #2563eb; /* bg-blue-700 */
+        }
+        /* ボタンのスタイル */
+        .btn {
+            background-color: #10b981; /* bg-emerald-500 */
+            color: white;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn:hover {
+            background-color: #059669; /* bg-emerald-600 */
+        }
+        .btn:disabled {
+            background-color: #4b5563; /* bg-gray-600 */
+            cursor: not-allowed;
+        }
+        /* スピナー */
+        .loader {
+            border: 4px solid #374151; /* border-gray-700 */
+            border-top: 4px solid #10b981; /* border-emerald-500 */
+            border-radius: 50%;
+            width: 1.5rem; /* w-6 */
+            height: 1.5rem; /* h-6 */
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <div class="container mx-auto max-w-3xl p-4 md:p-8">
+        <h1 class="text-3xl font-bold text-center text-white mb-6">MP4フレーム抽出ツール</h1>
+        <p class="text-center text-gray-400 mb-8">MP4動画をアップロードし、全フレームをPNG画像としてZIPファイルでダウンロードします。</p>
+
+        <!-- ステップ1: ファイル選択 -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-white mb-4">ステップ1: 動画ファイルを選択</h2>
+            <input type="file" id="fileInput" accept="video/mp4" class="w-full text-sm text-gray-400 file:mr-4">
+        </div>
+
+        <!-- ステップ2: プレビュー -->
+        <div class="card" id="previewCard" style="display: none;">
+            <h2 class="text-xl font-semibold text-white mb-4">ステップ2: プレビュー</h2>
+            <video id="videoPlayer" controls class="w-full rounded-lg bg-black" muted playsinline></video>
+        </div>
+
+        <!-- ステップ3: 抽出実行 -->
+        <div class="card" id="controlCard" style="display: none;">
+            <h2 class="text-xl font-semibold text-white mb-4">ステップ3: フレーム抽出</h2>
+            <button id="extractButton" class="btn w-full">
+                抽出開始
+            </button>
+            <div id="statusArea" class="mt-4 text-center text-gray-400" style="display: none;">
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="loader"></div>
+                    <span id="statusText">処理中です...</span>
+                </div>
+                <div id="progressText" class="text-sm mt-2">フレーム 0</div>
+            </div>
+        </div>
+
+        <!-- ステップ4: ダウンロード -->
+        <div class="card" id="downloadCard" style="display: none;">
+            <h2 class="text-xl font-semibold text-white mb-4">ステップ4: ダウンロード</h2>
+            <div id="downloadArea" class="text-center">
+                <!-- ダウンロードリンクがここに追加されます -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('fileInput');
+            const previewCard = document.getElementById('previewCard');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const controlCard = document.getElementById('controlCard');
+            const extractButton = document.getElementById('extractButton');
+            const statusArea = document.getElementById('statusArea');
+            const statusText = document.getElementById('statusText');
+            const progressText = document.getElementById('progressText');
+            const downloadCard = document.getElementById('downloadCard');
+            const downloadArea = document.getElementById('downloadArea');
+
+            let zip = null;
+            let frameCount = 0;
+            let videoFile = null;
+            let canvas = null;
+            let ctx = null;
+            
+            // --- 修正点 ---
+            let isExtracting = false; // 抽出処理中フラグ
+            let isFinishing = false;  // ZIP生成処理中フラグ
+            // --- 修正点おわり ---
+
+            // ファイルが選択されたときの処理
+            fileInput.addEventListener('change', (event) => {
+                videoFile = event.target.files[0];
+                if (videoFile) {
+                    const url = URL.createObjectURL(videoFile);
+                    videoPlayer.src = url;
+                    previewCard.style.display = 'block';
+                    controlCard.style.display = 'block';
+                    downloadCard.style.display = 'none';
+                    downloadArea.innerHTML = '';
+                    extractButton.disabled = false;
+                    extractButton.innerText = '抽出開始';
+                }
+            });
+
+            // --- 修正点: 'ended' イベントハンドラを定義 ---
+            const onVideoEnded = () => {
+                console.log("Video ended event fired.");
+                // 抽出中（isExtracting）の場合のみ終了処理を呼び出す
+                if (isExtracting) {
+                    finishExtraction();
+                }
+                // イベントリスナーをクリーンアップ
+                videoPlayer.removeEventListener('ended', onVideoEnded);
+            };
+            // --- 修正点おわり ---
+
+            // 抽出ボタンがクリックされたときの処理
+            extractButton.addEventListener('click', () => {
+                if (!videoPlayer.src) {
+                    alert('まず動画ファイルを選択してください。');
+                    return;
+                }
+
+                // 状態をリセット
+                zip = new JSZip();
+                frameCount = 0;
+                // --- 修正点: フラグをセット ---
+                isExtracting = true;
+                isFinishing = false;
+                // --- 修正点おわり ---
+
+                extractButton.disabled = true;
+                extractButton.innerText = '抽出中...';
+                statusArea.style.display = 'block';
+                statusText.innerText = '初期化中...';
+                progressText.innerText = 'フレーム 0';
+                downloadCard.style.display = 'none';
+                downloadArea.innerHTML = '';
+
+                // --- 修正点: 'ended' イベントリスナーをアタッチ ---
+                // 念のため既存のリスナーを削除してから追加
+                videoPlayer.removeEventListener('ended', onVideoEnded);
+                videoPlayer.addEventListener('ended', onVideoEnded);
+                // --- 修正点おわり ---
+
+                // canvasをセットアップ
+                if (!canvas) {
+                    canvas = document.createElement('canvas');
+                }
+                
+                const startExtraction = () => {
+                    canvas.width = videoPlayer.videoWidth;
+                    canvas.height = videoPlayer.videoHeight;
+                    ctx = canvas.getContext('2d');
+                    
+                    statusText.innerText = 'フレームをキャプチャ中...';
+                    videoPlayer.currentTime = 0;
+                    videoPlayer.play();
+                    
+                    // 最初のフレームコールバックを要求
+                    videoPlayer.requestVideoFrameCallback(processFrame);
+                };
+
+                // 動画のメタデータが読み込まれたら開始
+                if (videoPlayer.readyState >= 1) { // HAVE_METADATA
+                    startExtraction();
+                } else {
+                    videoPlayer.addEventListener('loadedmetadata', startExtraction, { once: true });
+                    // videoPlayer.src を再設定して loadedmetadata をトリガーする
+                    videoPlayer.src = URL.createObjectURL(videoFile);
+                }
+            });
+
+            // フレーム処理のコールバック関数
+            function processFrame(now, metadata) {
+                // --- 修正点: 抽出中フラグをチェック ---
+                // 抽出中でない（停止または完了）場合は何もしない
+                if (!isExtracting || !ctx) {
+                    return;
+                }
+                // --- 修正点おわり ---
+
+                // 終了条件のチェック (主に手動停止用)
+                if (videoPlayer.paused || videoPlayer.ended) {
+                    console.log(`processFrame stop: paused=${videoPlayer.paused}, ended=${videoPlayer.ended}`);
+                    if (videoPlayer.ended) {
+                        // ended イベントが先に発火することを期待するが、念のため
+                        finishExtraction();
+                    } else {
+                        // ユーザーが手動で停止した場合
+                        statusText.innerText = '処理が停止しました。';
+                        extractButton.disabled = false;
+                        extractButton.innerText = '抽出開始';
+                        isExtracting = false; // 抽出停止
+                    }
+                    return;
+                }
+
+                // フレームを描画
+                ctx.drawImage(videoPlayer, 0, 0, canvas.width, canvas.height);
+                frameCount++;
+                progressText.innerText = `フレーム ${frameCount}`;
+
+                // CanvasからBlobを取得してZIPに追加 (toBlobの方が効率的)
+                canvas.toBlob((blob) => {
+                    // --- 修正点: Blob生成中に停止された場合をチェック ---
+                    if (!isExtracting) return; 
+                    // --- 修正点おわり ---
+                    
+                    const fileName = `frame_${String(frameCount).padStart(5, '0')}.png`;
+                    zip.file(fileName, blob);
+                    
+                    // 次のフレームコールバックを要求
+                    videoPlayer.requestVideoFrameCallback(processFrame);
+                }, 'image/png');
+            }
+
+            // 抽出完了処理
+            function finishExtraction() {
+                // --- 修正点: 多重実行防止 ---
+                // 既に終了処理中か、抽出がアクティブでない場合は何もしない
+                if (isFinishing || !isExtracting) {
+                    console.log(`finishExtraction skipped: isFinishing=${isFinishing}, isExtracting=${isExtracting}`);
+                    return;
+                }
+                isFinishing = true;  // 終了処理開始
+                isExtracting = false; // 抽出処理停止
+                
+                console.log("finishExtraction called.");
+                // --- 修正点おわり ---
+
+                statusText.innerText = 'ZIPファイルを生成中...';
+                if (!videoPlayer.paused) {
+                    videoPlayer.pause();
+                }
+                
+                // ended リスナーを明示的に削除
+                videoPlayer.removeEventListener('ended', onVideoEnded);
+
+                zip.generateAsync({ type: 'blob' }, (metadata) => {
+                    // ZIP圧縮の進捗
+                    statusText.innerText = `ZIP圧縮中: ${Math.round(metadata.percent)}%`;
+                })
+                .then((content) => {
+                    // ダウンロードリンクを作成
+                    const zipUrl = URL.createObjectURL(content);
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = zipUrl;
+                    
+                    const baseName = videoFile.name.split('.').slice(0, -1).join('.') || 'video';
+                    downloadLink.download = `${baseName}_frames.zip`;
+                    
+                    downloadLink.innerText = `ダウンロード: ${baseName}_frames.zip (${frameCount} フレーム)`;
+                    downloadLink.className = 'text-emerald-400 hover:text-emerald-300 font-medium underline';
+                    
+                    downloadArea.innerHTML = '';
+                    downloadArea.appendChild(downloadLink);
+                    
+                    statusArea.style.display = 'none';
+                    downloadCard.style.display = 'block';
+                    extractButton.disabled = false;
+                    extractButton.innerText = '再度抽出する';
+
+                    isFinishing = false; // 終了処理完了
+                })
+                .catch((err) => {
+                    console.error(err);
+                    statusText.innerText = `エラーが発生しました: ${err.message}`;
+                    extractButton.disabled = false;
+                    extractButton.innerText = '再試行';
+                    isFinishing = false; // 終了処理完了(エラー)
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
+
